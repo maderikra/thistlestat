@@ -23,22 +23,10 @@ if ($results) {
 		$autoskipdate = 'false';
 	}
 
-	// why wasn't this deduped before
+	// make sure all dates appear in all arrays
 
-	$keyarraydate = array_unique($keyarraydate);
-
-	// insert zeroes if fields don't exist
-
-	foreach($keyarraydate as $lab1) {
-		foreach($results as $r1k => $r1v) {
-			if (!in_array_r($lab1, $r1v)) {
-				$results[$r1k][] = array(
-					"start_date" => $lab1,
-					"totals" => "0"
-				);
-			}
-		}
-	}
+	$chartarraydate = insertzeroes($chartarraydate)[0];
+	$keyarraydate = insertzeroes($chartarraydate)[1];
 
 	// prepare array for table display
 	// flatten array
@@ -66,6 +54,7 @@ if ($results) {
 	// reset array keys
 
 	$results = array_values($tablearrdate);
+	$results = insertzeroes($results)[0];
 
 	// create vars to match name and structure of multi chart vars
 
