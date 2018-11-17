@@ -29,7 +29,7 @@
 						</div>
 					</li>
 					<li class="dropdown">
-						<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" id="dropdownMenuLink" role="button"><i class="material-icons">laptop_mac</i> Databases</a>
+						<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" id="dropdowndb" role="button"><i class="material-icons">laptop_mac</i> Databases</a>
 						<div aria-labelledby="dropdownMenuLink" class="optionmenu dropdown-menu">
 							<?php
 							  foreach ($alldatabases as $db){
