@@ -691,9 +691,7 @@ $('#trig').on('click', function () {
         }
     });
 
-$('#reload').on('click', function () {
-//console.log("click");
-	});
+$("#dropdownsumm").parent().addClass("active");
 </script>
 
 </body>
