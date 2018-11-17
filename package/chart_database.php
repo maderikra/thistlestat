@@ -25,6 +25,8 @@ if (isset($_GET['product'])) {
 	$stmts->execute(['product' => $productname, 'startdate' => $startdate, 'enddate' => $enddate]);
 	$resultssingle = $stmts->fetchAll();
 
+	//make sure there are results
+	if ($resultssingle){
 	// group by institution
 
 	$resultgrp = array();
@@ -207,6 +209,7 @@ if (isset($_GET['product'])) {
 		}
 
 		ksort($nwr);
+		}
 	}
 }
 else {
