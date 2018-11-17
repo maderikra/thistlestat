@@ -57,6 +57,7 @@ include "chart_ebook.php";
 					</tr>
 				</table>
 			</div>
+			<?php if($resultstitle) : ?>
 			<div class="content">
 				<div class="row">
 					<div class="col-lg-4 top-left card-transition">
@@ -289,6 +290,10 @@ include "chart_ebook.php";
 				</div>
 				
 			</div>
+			<?php else : ?>
+			<div class="alert alert-danger" role="alert"> There are no statistics for the selected dates.</div>
+			<?php endif; ?>
+
 						<?php include dirname(dirname( __FILE__ )) . "/includes/footer.php"; ?>
 
 		</div>
@@ -314,7 +319,7 @@ $("#quicksearch").autocomplete({
     }
    });
 });
-
+<?php if($resultstitle) : ?>
 var ctx = document.getElementById("myChartinst").getContext('2d');
 var myChart = new Chart(ctx, {
     type: '<?php echo $charttype; ?>',
@@ -761,6 +766,7 @@ for (i = 0; i < myCharttype.data.datasets[0].data.length; i++) {
 myCharttype.update(); //update the chart
 
 
+
 function loadinstitution(event, array) {
     if (array.length > 0) {
         var lab = array[0]._chart.config.data.abbrevs[array[0]._index];
@@ -889,6 +895,7 @@ $('#expandtable').on('click', function() {
 
 
 });
+<?php endif; ?>
 
 	$('.date-picker').datepicker( {
         changeMonth: true,
