@@ -110,6 +110,10 @@ foreach($bencharray as $thisbench) {
 			$showlegenddate = 'true';
 			$autoskipdate = 'false';
 		}
+		//if not results, inserts zeroes for usage summary graph
+		else{
+			$chartarraygrp[$instnamecur] = [];
+		}
 	}
 }
 
