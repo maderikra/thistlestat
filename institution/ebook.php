@@ -1,599 +1,314 @@
-<!DOCTYPE html>
-<html lang="en">
-<?php 
+<?php
 
-include dirname(dirname( __FILE__ )) . "/includes/config.php";
-include dirname(dirname( __FILE__ )) . "/includes/header.php";
-include dirname(dirname( __FILE__ )) . "/includes/preparedates.php";
-include dirname(dirname( __FILE__ )) . "/includes/packagelists.php";
-include dirname(dirname( __FILE__ )) . "/includes/preparesummary.php";
+function array_keys_multi(array $array)
+{
+	$keys = array();
+	foreach($array as $value) {
+		foreach($value as $key => $val) {
+			if (!in_array($key, $keys)) {
+				$keys[] = $key;
+			}
+		}
+	}
 
-if (isset($_GET['benchmark1'])){
-	include 'chart_multi_ebook.php'; 
+	return $keys;
 }
-else {
-	include 'chart_basic_ebook.php';
-}	
 
-$fullinstname = institutionlookup($_GET['inst'],"Inst_abbrev")['Institution'];
+$_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
+
+// get all benchmarks
+
+$bencharray = array();
+$bencharray['inst'] = $_GET['inst'];
+
+foreach($_GET as $key => $value) {
+	if (strpos($key, 'benchmark') === 0) {
+		$bencharray[$key] = $value;
+	}
+}
+
+// dedupe benchmarks, in case the same one got added twice
+
+$bencharray = array_unique($bencharray);
+$instnamecur = 'None selected';
+$productname = 'None selected';
+$i = 0;
+$chartarray = array();
+include dirname(dirname(__FILE__)) . "/includes/preparedates.php";
+
+// run queries for each benchmark
+
+foreach($bencharray as $thisbench) {
+	$labelsarr = array();
+	$totalsarr = array();
+
+	// make sure a product is selected; if not, show usage summary
+
+	if (isset($_GET['product'])) {
+		$instnamecur = $thisbench;
+		$productname = $_GET['product'];
+		$charttype = "bar";
+		$linecolor = "#ccc";
+		$onclickevent = "null";
+		$stmt = $pdo->prepare('SELECT Title, SUM(Requests) as totals FROM  ' . EBOOKTABLE . '  WHERE Inst_abbrev = :instabbrev AND product_abbrev = :prodabb AND start_date >= :startdate and start_date <= :enddate group by Title');
+		$stmt->execute(['instabbrev' => $instnamecur, 'prodabb' => $productname, 'startdate' => $startdate, 'enddate' => $enddate]);
+		$results = $stmt->fetchAll();
+		if ($results) {
+			$totalresults[] = count($results);
+			foreach($results as $row) {
+				$labelsarr[] = str_replace("'", "\'", $row['Title']);
+				$totalsarr[str_replace("'", "\'", $row['Title']) ] = $row['totals'];
+				$datatablearr[str_replace("'", "\'", $row['Title']) ][$instnamecur] = $row['totals'];
+			}
+
+			// push all data to master array
+
+			$chartarray[$instnamecur] = $totalsarr;
+			$xlabel = 'Title';
+			$ylabel = 'Uses';
+
+			// calculate number groupings
+
+			$groupednums = array_count_values($totalsarr);
+
+			// sort by uses
+
+			ksort($groupednums);
+			$chartarraygrp[$instnamecur] = $groupednums;
+			$xlabelgrp = 'Total Use';
+			$ylabelgrp = 'Number of Titles';
+			$showlegendgrp = 'false';
+			$onclickeventgrp = "filtertitles";
+			$autoskipgrp = 'true';
+			$charttypegrp = "bar";
+			$keyarraygrp = array();
+			foreach($chartarraygrp as $arr) {
+				foreach($arr as $arrk => $arrv) {
+					$keyarraygrp[] = $arrk;
+				}
+			}
+
+			$charttypedate = "line";
+			$linecolordate = "#3535b2";
+			$onclickeventdate = "null";
+			$labelsarrdate = array();
+			$totalsarrdate = array();
+			$stmt = $pdo->prepare('SELECT start_date, SUM(Requests) as totals FROM  ' . EBOOKTABLE . '  WHERE Inst_abbrev = :instabbrev AND product_abbrev = :prodabb AND start_date >= :startdate and start_date <= :enddate group by start_date');
+			$stmt->execute(['instabbrev' => $instnamecur, 'prodabb' => $productname, 'startdate' => $startdate, 'enddate' => $enddate]);
+			$resultsdate = $stmt->fetchAll();
+			foreach($resultsdate as $row) {
+				$labelsarrdate[] = $row['start_date'];
+				$totalsarrdate[$row['start_date']] = $row['totals'];
+				$datatablearrdate[$row['start_date']][$instnamecur] = $row['totals'];
+			}
+
+			// push all data to master array
+
+			$chartarraydate[$instnamecur] = $totalsarrdate;
+			$xlabeldate = 'Date';
+			$ylabeldate = 'Uses';
+			$showlegenddate = 'true';
+			$autoskipdate = 'false';
+		}
+		//if not results, inserts zeroes for usage summary graph
+		else{
+			$chartarraygrp[$instnamecur] = [];
+		}
+	}
+}
+
+// sort totals array to find the biggest; don't display if too big
+
+rsort($totalresults);
+
+// make sure missing titles/packages appear in all arrays
+
+$titlearrayfull = insertzeroes($chartarray);
+$chartarray = $titlearrayfull[0];
+$keyarray = $titlearrayfull[1];
+$datearrayfull = insertzeroes($chartarraydate);
+$chartarraydate = $datearrayfull[0];
+$keyarraydate = $datearrayfull[1];
+$grouparrayfull = insertzeroes($chartarraygrp);
+$chartarraygrp = $grouparrayfull[0];
+$keyarraygrp = $grouparrayfull[1];
+
+function Quartile_25($Array)
+{
+	return Quartile($Array, 0.25);
+}
+
+function Quartile_50($Array)
+{
+	return Quartile($Array, 0.5);
+}
+
+function Quartile_75($Array)
+{
+	return Quartile($Array, 0.75);
+}
+
+function Quartile($Array, $Quartile)
+{
+	$pos = (count($Array) - 1) * $Quartile;
+	$base = floor($pos);
+	$rest = $pos - $base;
+	if (isset($Array[$base + 1])) {
+		return $Array[$base] + $rest * ($Array[$base + 1] - $Array[$base]);
+	}
+	else {
+		return $Array[$base];
+	}
+}
+
+$keyarraygrp = array_values($keyarraygrp);
+
+// subtract the third from the first quartile to get IQR or summat
+
+$iqr = Quartile_75($keyarraygrp) - Quartile_25($keyarraygrp);
+$maxrange = Quartile_75($keyarraygrp) + $iqr;
+$maxnum = 1;
+
+// find nearest set value to the max range
+
+foreach($keyarraygrp as $kgrp) {
+	if ($kgrp < $maxrange) {
+		$maxnum = $kgrp;
+		continue;
+	}
+	else {
+		$maxnum = $maxnum;
+		break;
+	}
+}
+
+$outliers = array();
+
+// grab first elemtn in chart array, we don't know what the key (instname) is but who cares
+// find values are greater than the max range (i.e. how many outliers)
+foreach($chartarraygrp as $chartinst => $chartarr) {
+	foreach($chartarr as $tick => $cnt) {
+		if ($tick > $maxrange) {
+			$outliers[$chartinst][$tick] = $cnt;
+		}
+	}
+}
+
+$numoutliers = count($outliers);
+end($chartarraygrp);
+$chartarraygrpexpanded = array();
+
+// insert zeroes to make expanded graph
+
+for ($i = 1; $i <= $maxnum; $i++) {
+	foreach($chartarraygrp as $instgrp => $cgrp) {
+
+		// add if not present as a key in original array
+
+		if (!array_key_exists($i, $cgrp)) {
+			$chartarraygrpexpanded[$instgrp][$i] = 0;
+		}
+		else {
+			$chartarraygrpexpanded[$instgrp][$i] = $cgrp[$i];
+		}
+	}
+}
+
+// insert a blank value at the end for funsies
+// or just to put a space before the outliers
+
+reset($chartarraygrpexpanded);
+$last_key = key(array_slice(current($chartarraygrpexpanded) , -1, 1, TRUE));
+end($chartarraygrpexpanded);
+
+foreach($chartarraygrpexpanded as & $cgrpex) {
+	$cgrpex[$last_key + 1] = 0;
+}
+
+$keyarraygrpexpanded = array();
+reset($chartarraygrpexpanded);
+
+foreach(current($chartarraygrpexpanded) as $arrk => $arrv) {
+	$keyarraygrpexpanded[] = $arrk;
+}
+
+end($chartarraygrpexpanded);
+$st = count($keyarraygrpexpanded) + $numoutliers;
+
+// add extra slots to the key array, increment by one (these labels will be hidden)
+
+for ($i = count($keyarraygrpexpanded) + 1; $i <= $st; $i++) {
+	$keyarraygrpexpanded[] = $i;
+}
+
+// merge filled in array and outliers, if there are any
+
+if ($outliers) {
+	foreach($chartarraygrpexpanded as $instk => & $cht) {
+		if ($outliers[$instk]) {
+			$cht = $cht + $outliers[$instk];
+		}
+	}
+}
+
+// get all keys again with their actual values
+
+reset($chartarraygrpexpanded);
+$realkeys = array_keys(current($chartarraygrpexpanded));
+end($chartarraygrpexpanded);
+
+// set up datatables
+
+ksort($chartarraygrpexpanded);
+
+foreach($chartarraygrpexpanded as $grpsint => $grpexp) {
+	foreach($grpexp as $nm => $tt) {
+		$grpdatatable[$nm][$grpsint] = $tt;
+	}
+}
+
+// get all institutions
+// $allinsts = array_keys_multi($datatablearr);
+
+$allinsts = $bencharray;
+asort($allinsts);
+
+// insert zeroes
+
+foreach($datatablearr as $titlekey => $arr1) {
+	foreach($allinsts as $inst) {
+		if (!array_key_exists($inst, $arr1)) {
+			$datatablearr[$titlekey][$inst] = '0';
+		}
+	}
+}
+
+// sort by keys to keep in right order
+
+foreach($datatablearr as & $datatab) {
+	ksort($datatab);
+}
+
+// get all institutions
+// $allinstsdate = array_keys_multi($datatablearrdate);
+
+$allinstsdate = $bencharray;
+asort($allinstsdate);
+
+// insert zeroes
+
+foreach($datatablearrdate as $titlekey => $arr1) {
+	foreach($allinstsdate as $inst) {
+		if (!array_key_exists($inst, $arr1)) {
+			$datatablearrdate[$titlekey][$inst] = '0';
+		}
+	}
+}
+
+// sort by keys to keep in right order
+
+foreach($datatablearrdate as & $datatab) {
+	ksort($datatab);
+}
 
 ?>
-
-<head>
-  <title><?php echo $consortiumname . " " . $sitename; ?>: E-Book Analysis</title>
-
- <?php include dirname(dirname( __FILE__ )) . "/includes/head.php"; ?>
-
-
-</head>
-
-<body class="">
-	<div class="wrapper">
-	
-		<?php include "include_sidemenu.php"; ?>
-	
-		<div class="main-panel">
-			<?php include "include_topnav.php"; ?>
-           
-			<div class="panel">
-            <div class="row">
-             <div class="col-md-12 crumb">
-               
-<ul class="breadcrumbround">
-  <li>
-    <a href="#">
-    <i class="material-icons">import_contacts</i> <?php echo $productnamefull; ?>
-    </a>
-  </li>
-    <li>
-    <a href="index.php?inst=<?php echo $instname; ?>">
-      <i class="material-icons">school</i> Institution View
-    </a>
-  </li>
-  <li>
-    <a href="/">
-    <i class="material-icons">home</i>
-      <span class="text">Home</span>
-    </a>
-  </li>
-</ul>
-    </div>
-            <div class="col-md-6 col-sm-12">
-                         <h3 class="instname"><?php echo $fullinstname; ?> </h3>  
-				<table class="sm-table" id="summtable">
-					<tr>
-						<td class="cellheading">Package Name:</td>
-						<td><a href="/package/journal.php?product=<?php echo $productname; ?>"><strong><?php echo $productnamefull; ?></strong></a></td>
-					</tr>
-                    <tr>
-						<td class="cellheading">Package Type:</td>
-						<td>E-Book</td>
-					</tr>
-					<tr>
-						<td class="cellheading">Dates Selected:</td>
-						<td><?php echo $startdate . ' to ' . $enddate; ?></td>
-					</tr>
-					<tr>
-						<td class="cellheading">Dates Available:</td>
-						<td><?php echo $datesavail['firstdate'] . ' to ' . $datesavail['lastdate']; ?></td>
-					</tr>
-					<tr>
-						<td class="cellheading">Vendor:</td>
-						<td>
-							<a href="vendor.php?inst=<?php echo $instname; ?>&product=<?php echo $vendorabbrev; ?>"><?php echo $vendornamefull; ?></a>
-						</td>
-					</tr>
-					<tr>
-						<td class="cellheading">Titles in Package:</td>
-						<td>
-							<a href="#datatable"><?php echo counttitles($productname,EBOOKTABLE);?></a>
-						</td>
-					</tr>
-                         <tr>
-						<td class="cellheading">Download Raw Dataset:</td>
-						<td>
-							<a href="download.php?inst=<?php echo $instname; ?>&product=<?php echo $productname; ?>&type=<?php echo EBOOKTABLE; ?>"><i class="material-icons">cloud_download</i></a>
-						</td>
-					</tr>
-				</table>
-			</div>
-         
-              <div class="col-md-6 col-sm-12">
-              
-   
-				<?php include 'include_benchmark.php'; ?>
-				</div>
-              </div>
-         </div>
-		 </div>
-            
-			<div class="content">
-				<div class="row">
-
-					<div class="col-lg-12 top-left card-transition">
-						<div class="card card-chart">
-						
-							<? if ($results): ?>
-
-							<div class="card-header">	
-										
-								
-								<h4 class="card-title"><i class="material-icons " id="topleft" >zoom_out_map</i> Date View</h4>
-								<div class="dropdown">		
-								<ul class="nav nav-pills pills-circle" role="tablist">
-									<li class="nav-item">
-										<a aria-controls="date-chart" aria-selected="true" class="nav-link active" data-toggle="pill" href="#date-chart" id="date-chart-tab" role="tab" title="Show Chart"><i class="material-icons">show_chart</i></a>
-									</li>
-									<li class="nav-item">
-										<a aria-controls="date-table" aria-selected="false" class="nav-link" data-toggle="pill" href="#date-table" id="date-table-tab" role="tab" title="Show Data Table"><i class="material-icons">list_alt</i></a>
-									</li>
-								</ul>
-	</div>
-				
-							</div>
-							
-							<div class="card-body">
-								
-								<div class="tab-content" id="pills-tabContent">
-  <div class="tab-pane fade show active" id="date-chart" role="tabpanel" aria-labelledby="date-chart-tab">
-  <div class="chart-area">
-									<canvas id="myChartdate"></canvas>
-								</div>
-  </div>
-  <div class="tab-pane fade" id="date-table" role="tabpanel" aria-labelledby="date-table-tab">
-			<table id="datatabledate"  class="table table-hover table-bordered compact" width="100%" cellspacing="0">
-  <thead>
- 
-            <tr>
-			 <th>Title</th>
-			  <?php foreach($allinstsdate as $arrkey): ?>
-                <th><?php echo $arrkey; ?></th>
-			<?php endforeach; ?>
-            </tr>
-        </thead>
-    <?php foreach($datatablearrdate as $key => $value): ?>
-    <tr>
-	<td><?php echo $key; ?></td>
-    <?php foreach($value as $val): ?>
-
-        <td><?php echo $val; ?></td>
-
-    <?php endforeach; ?>
-     </tr>
-   <?php endforeach; ?>
-</table>
-
-  </div>
-</div>
-							</div>
-							<div class="card-footer"></div>
-										<? else: ?>
-					  <div class="alert alert-danger" role="alert"> There are no statistics for this search:
-					  <ul>
-					  <li><?php echo $fullinstname; ?></li>
-					  <li><?php echo $productnamefull; ?></li>
-					  <li><?php echo $startdate; ?> to <?php echo $enddate; ?></li> 
-					  </ul>
-					  </div>
-					<? endif; ?>
-						</div>
-					</div>
-					
-		
-
-			</div>
-				<? if ($results): ?>
-
-				<div class="row">
-					<div class="col-md-6 bottom-left card-transition">
-						<div class="card card-chart card-tall">
-							<div class="card-header">
-								<h4 class="card-title"><i class="material-icons" id="bottomleft">zoom_out_map</i> Title List</h4>
-								<div class="dropdown">
-									<ul class="nav nav-pills pills-circle" role="tablist">
-									<li class="nav-item">
-										<a aria-controls="title-chart" aria-selected="true" class="nav-link" data-toggle="pill" href="#title-chart" id="title-chart-tab" role="tab" title="Show Chart"><i class="material-icons">show_chart</i></a>
-									</li>
-									<li class="nav-item">
-										<a aria-controls="title-table" aria-selected="false" class="nav-link active" data-toggle="pill" href="#title-table" id="title-table-tab" role="tab" title="Show Data Table"><i class="material-icons">list_alt</i></a>
-									</li>
-								</ul>
-								</div>
-							</div>
-							<div class="card-body">
-							<div class="tab-content" id="pills-tabContent1">
-							 <div class="tab-pane fade show active" id="title-table" role="tabpanel" aria-labelledby="title-table-tab">
-								<button id="resettable" class="dt-button">Clear Table Filters</button>
-
-								<table id="datatable" class="table table-hover table-bordered compact" width="100%" cellspacing="0">
-								  <thead>
-											 <tr>
-											 <th>Title</th>
-											  <?php foreach($allinsts as $arrkey): ?>
-												<th><?php echo $arrkey; ?></th>
-											<?php endforeach; ?>
-											</tr>
-										</thead>
-									<?php foreach($datatablearr as $key => $value): ?>
-									<tr>
-									<td><?php echo $key; ?></td>
-									<?php foreach($value as $val): ?>
-
-										<td><?php echo $val; ?></td>
-
-									<?php endforeach; ?>
-									 </tr>
-								   <?php endforeach; ?>
-								</table>
-								</div>
-								
-								  <div class="tab-pane fade" id="title-chart" role="tabpanel" aria-labelledby="title-chart-tab">
-								  <div class="chart-area"><canvas id="myChart"></canvas></div>
-								  </div>
-								 
-								</div>
-
-								
-							</div>
-							<div class="card-footer">
-								<hr>
-								<div class="stats"></div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="col-md-6 bottom-right card-transition">
-						<div class="card card-chart">
-							<div class="card-header">
-								<h4 class="card-title"><i class="material-icons" id="bottomright">zoom_out_map</i> Typical Usage</h4>
-								<div class="dropdown">
-									<ul class="nav nav-pills pills-circle" role="tablist">
-									<li class="nav-item">
-										<a aria-controls="summ-chart" aria-selected="true" class="nav-link active" data-toggle="pill" href="#summ-chart" id="summ-chart-tab" role="tab" title="Show Chart"><i class="material-icons">show_chart</i></a>
-									</li>
-									<li class="nav-item">
-										<a aria-controls="summ-table" aria-selected="false" class="nav-link" data-toggle="pill" href="#summ-table" id="summ-table-tab" role="tab" title="Show Data Table"><i class="material-icons">list_alt</i></a>
-									</li>
-								</ul>
-								</div>
-							</div>
-							<div class="card-body">
-											<div class="tab-content" id="pills-tabContent2">
-							 <div class="tab-pane fade" id="summ-table" role="tabpanel" aria-labelledby="summ-table-tab">
-							 
-							<table id="summarytable" class="table table-hover table-bordered compact" width="100%" cellspacing="0">
-								  <thead>
-									<tr>
-									<th>Number of Uses</th>
-									<?php foreach($allinsts as $arrkey): ?>
-												<th># Titles (<?php echo $arrkey; ?>)</th>
-									<?php endforeach; ?>
-									
-									</tr>
-								  </thead>
-									<?php foreach($grpdatatable as $usages => $totnums): ?>
-											<tr>
-												<td><?php echo $usages; ?></td>
-													<?php foreach($totnums as $tts): ?>
-													<td><?php echo $tts; ?></td>
-													<?php endforeach; ?>
-											 </tr>
-								   <?php endforeach; ?>
-								</table>
-								
-										</div>
-							  <div class="tab-pane fade show active" id="summ-chart" role="tabpanel" aria-labelledby="summ-chart-tab">
-								 
-								 <div class="chart-area">
-									<canvas id="myChartgrp"></canvas>
-								</div>
-								  </div>
-								 
-								</div>
-								
-								
-						
-								  
-							</div>
-							<div class="card-footer">
-								<hr>
-								<div class="stats"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<? endif; ?>
-			</div>
-			<?php include dirname(dirname( __FILE__ )) . "/includes/footer.php"; ?>
-		</div>
-	</div>
-
-
-  <!--   Core JS Files   -->
-
- <?php include dirname(dirname( __FILE__ )) . "/includes/packagescripts.php"; ?>
-
- <script>
-
-<? if ($results): ?>
-
-var ctx = document.getElementById("myChartdate").getContext('2d');
-var myChartdate = new Chart(ctx, {
-    type: '<?php echo $charttypedate; ?>',
-    data: {
-        labels: ['<?php echo implode("','",$keyarraydate); ?>'],
-        datasets: [
-		<?php $i = 0; ?>
-		<?php foreach($chartarraydate as $chartk => $chartvalue): ?>
-		
-		{
-            label: "<?php echo $chartk; ?>",
-            data: [<?php echo implode(",",$chartvalue); ?>],
-			fill: false,
-			 backgroundColor : '<?php echo ${"color" . $i} ?>',
-			 borderColor: '<?php echo ${"color" . $i} ?>',
-            borderWidth: 1
-        },
-		<?php $i++; ?>
-		<?php endforeach; ?>
-		]
-    },
-    options: {
-		legend: {
-      display: <?php echo $showlegenddate; ?>,
-		},
-		 responsive:true,
-		 onClick: <?php echo $onclickeventdate; ?>,
-  	    maintainAspectRatio: false,
-        scales: {
-			 xAxes: [{
-        stacked: false,
-        beginAtZero: true,
-        scaleLabel: {
-            labelString: '<?php echo $xlabeldate; ?>',
-			display: true
-        },
-		gridLines: {
-			display: false,
-		},
-        ticks: {
-            stepSize: 1,
-            min: 0,
-            autoSkip: <?php echo $autoskipdate; ?>,
-			maxRotation: 45,
-                    minRotation: 45
-        }
-    }],
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                },
-				        scaleLabel: {
-            labelString: '<?php echo $ylabeldate; ?>',
-			display: true
-        },
-            }]
-        }
-    },
-
-
-});
-
-
-var ctx = document.getElementById("myChartgrp").getContext('2d');
-var myChartgrp = new Chart(ctx, {
-    type: '<?php echo $charttypegrp; ?>',
-    data: {
-        labels: ['<?php echo implode("','",$keyarraygrpexpanded); ?>'],
-		actualvalues: ['<?php echo implode("','",$realkeys); ?>'],
-        datasets: [
-		<?php $i = 0; ?>
-		<?php foreach($chartarraygrpexpanded as $chartk => $chartvalue): ?>
-		
-		{
-            label: "<?php echo $chartk; ?>",
-            data: [<?php echo implode(",",$chartvalue); ?>],
-			fill: false,
-			 backgroundColor : [],
-			 borderColor: [],
-            borderWidth: 1
-        },
-		<?php $i++; ?>
-		<?php endforeach; ?>
-		]
-    },
-    options: {
-		tooltips: {
-      callbacks: {
-        title: function(tooltipItem, data) {
-          return data['actualvalues'][tooltipItem[0]['index']];
-		 
-        },
-        label: function(tooltipItem, data) {
-          return data['datasets'][0]['data'][tooltipItem['index']];
-        }
-      }
-		},
-		legend: {
-      display: <?php echo $showlegendgrp; ?>,
-		},
-		 responsive:true,
-		 onClick: <?php echo $onclickeventgrp; ?>,
-         maintainAspectRatio: false,
-		 title: {
-            display: true,
-            text: '<?php echo $startdate . " to " . $enddate; ?>',
-			fontSize: 16,
-			fontColor: "#5D7B93",
-        },
-        scales: {
-			 xAxes: [{
-				 
-        stacked: false,
-        beginAtZero: true,
-        scaleLabel: {
-            labelString: '<?php echo $xlabelgrp; ?>',
-			display: true
-        },
-		gridLines: {
-			display: false,
-		},
-        ticks: {
-            stepSize: 1,
-            min: 0,
-            autoSkip: <?php echo $autoskipgrp; ?>,
-			maxRotation: 45,
-                    minRotation: 45
-        },
-		afterTickToLabelConversion: function(scaleInstance) {
-  // set the first and last tick to null so it does not display
-  // note, ticks[0] is the last tick and ticks[length - 1] is the first
-  <?php
-  for($i = 1; $i<=$numoutliers; $i++) {
-  echo "scaleInstance.ticks[scaleInstance.ticks.length - " . $i . "] = null;";
-  } 
-  ?>
-
-  // need to do the same thing for this similiar array which is used internally
- // scaleInstance.ticksAsNumbers[0] = null;
- // scaleInstance.ticksAsNumbers[scaleInstance.ticksAsNumbers.length - 1] = null;
-}
-    }],
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                },
-				        scaleLabel: {
-            labelString: '<?php echo $ylabelgrp; ?>',
-			display: true
-        },
-            }]
-        }
-    },
-
-
-});
-
-//make the outliers red
- for (i = 0; i < myChartgrp.data.datasets[0].data.length; i++) {
-	if (i < (myChartgrp.data.datasets[0].data.length - <?php echo $numoutliers; ?>)){
-		myChartgrp.data.datasets[0].backgroundColor[i] = "<?php echo ${"color0"} ?>";
-		myChartgrp.data.datasets[0].borderColor[i] = "<?php echo ${"color0"} ?>";
-	}
-	else{
-        myChartgrp.data.datasets[0].backgroundColor[i] = "#ff0000";
-		myChartgrp.data.datasets[0].borderColor[i] = "#ff0000";
-	}
-
- }
-    myChartgrp.update(); //update the chart
-	
-	function filtertitles(event, array){ 
-	if (array.length > 0){
-		actval = this.data.actualvalues[array[0]._index];
-		//$('#datatable').DataTable().columns( 1 ).search("^" + array[0]._model.label + "$", true, false, true).draw();
-		$('#datatable').DataTable().columns( 1 ).search("^" + actval + "$", true, false, true).draw();
-	}
-}
-
-	
-$('#title-chart-tab').on('shown.bs.tab', function(){
-<? if ($totalresults > 100): ?>
-$('#title-chart').html('<div class="alert alert-danger toolargealert" role="alert">There are too many titles to be displayed on this visualization.</div>');
-
-<? else: ?>
-
-var ctx = document.getElementById("myChart").getContext('2d');
-var myChart = new Chart(ctx, {
-    type: '<?php echo $charttype; ?>',
-    data: {
-        labels: ['<?php echo implode("','",$keyarray); ?>'],
-        datasets: [
-		<?php $i = 0; ?>
-		<?php foreach($chartarray as $chartk => $chartvalue): ?>
-		
-		{
-            label: "<?php echo $chartk; ?>",
-            data: [<?php echo implode(",",$chartvalue); ?>],
-			fill: false,
-			 backgroundColor : '<?php echo ${"color" . $i} ?>',
-			 borderColor: '<?php echo ${"color" . $i} ?>',
-            borderWidth: 1
-        },
-		<?php $i++; ?>
-		<?php endforeach; ?>
-		]
-    },
-    options: {
-		legend: {
-      display: <?php echo $showlegend; ?>,
-		},
-		 responsive:true,
-		 onClick: <?php echo $onclickevent; ?>,
-        maintainAspectRatio: false,
-        scales: {
-			 xAxes: [{
-        stacked: false,
-        beginAtZero: true,
-        scaleLabel: {
-            labelString: '<?php echo $xlabel; ?>',
-			display: true
-        },
-		gridLines: {
-			display: false,
-		},
-        ticks: {
-            stepSize: 1,
-            min: 0,
-            autoSkip: <?php echo $autoskip; ?>,
-			maxRotation: 45,
-                    minRotation: 45
-        }
-    }],
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                },
-				        scaleLabel: {
-            labelString: '<?php echo $ylabel; ?>',
-			display: true
-        },
-            }]
-        }
-    },
-
-});
-<? endif; ?>
-
-});
-
-
-<? endif; ?>
-
-
-benchtotal = <?php echo $j; ?>;
-
-
-var autocompletelist = [
-         <?php foreach ($allproducts as $prod){
-			 echo '{label:"' . $prod['Product'] . '",type:"' . $prod['type'] . '",value:"' . $prod['product_abbrev']. '"},';
-			 } ?>
-        ];
-
-$('.date-picker').datepicker( {
-        changeMonth: true,
-        changeYear: true,
-		minDate: '<?php echo $firstlastdate['earliest']; ?>',
-		maxDate: '<?php echo $firstlastdate['latest']; ?>',
-        showButtonPanel: true,
-        dateFormat: 'yy-mm-dd',
-        onClose: function(dateText, inst) { 
-            $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
-        }
-    });
-</script>
-
-<script src="institutionscripts.js"></script>
-
-</body>
-</html>
