@@ -274,6 +274,8 @@ $('.date-picker').datepicker( {
             $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
         }
     });
+	
+$("#dropdowndb").parent().addClass("active");
 </script>
 
 <script src="institutionscripts.js"></script>
