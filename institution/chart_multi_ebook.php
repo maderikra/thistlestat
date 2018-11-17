@@ -110,6 +110,10 @@ foreach($bencharray as $thisbench) {
 			$showlegenddate = 'true';
 			$autoskipdate = 'false';
 		}
+		//if not results, inserts zeroes for usage summary graph
+		else{
+			$chartarraygrp[$instnamecur] = [];
+		}
 	}
 }
 
@@ -182,7 +186,6 @@ $outliers = array();
 
 // grab first elemtn in chart array, we don't know what the key (instname) is but who cares
 // find values are greater than the max range (i.e. how many outliers)
-
 foreach($chartarraygrp as $chartinst => $chartarr) {
 	foreach($chartarr as $tick => $cnt) {
 		if ($tick > $maxrange) {
