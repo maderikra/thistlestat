@@ -53,6 +53,7 @@ include "chart_database.php";
 					</tr>
 				</table>
 			</div>
+			<?php if($resultssingle) : ?>
 			<div class="content">
 				<div class="row">
 					<div class="col-lg-4 top-left card-transition">
@@ -257,6 +258,9 @@ include "chart_database.php";
 					</div>
 				</div>
 			</div>
+			<?php else : ?>
+			<div class="alert alert-danger" role="alert"> There are no statistics for the selected dates.</div>
+			<?php endif; ?>
 						<?php include dirname(dirname( __FILE__ )) . "/includes/footer.php"; ?>
 		</div>
 	</div>
@@ -280,7 +284,7 @@ $("#quicksearch").autocomplete({
     }
    });
 });
-
+<?php if($resultssingle) : ?>
 var ctx = document.getElementById("myChartinst").getContext('2d');
 var myChart = new Chart(ctx, {
     type: '<?php echo $charttype; ?>',
@@ -807,9 +811,8 @@ $(document).ready(function() {
             'csvHtml5',
         ],
     });
-
-    dtable = $('#titletable').DataTable({
-        "paging": true,
+	
+	    $('#typetable').DataTable({
         "pageLength": 25,
         dom: 'Bfrtip',
         buttons: [
@@ -818,16 +821,6 @@ $(document).ready(function() {
             'csvHtml5',
         ],
     });
-
-    //count all columns
-    totalcols = dtable.columns()[0].length;
-
-    //hide all but first 4
-    for (var i = 1; i < totalcols - 1; i++) {
-        dtable.column(i).visible(false, false);
-    }
-    //dtable.column(3 ).visible( false, false );
-    dtable.columns.adjust().draw(false); // adjust column sizing and redraw
 
 });
 
@@ -850,28 +843,9 @@ $('#trig').on('click', function () {
     $('.bottom-left').toggleClass('order-lg-1');
     $('.bottom-right').toggleClass('col-lg-12');
 
-    var dtable = $('#titletable').DataTable();
-    //count visible columns
-    var viscols = dtable.columns().visible();
-    var countvis = viscols.filter(function(s) {
-        return s;
-    }).length;
-    //if only 2 are visible, expand
-    if (countvis == 2) {
-        for (var i = 0; i <= totalcols; i++) {
-            dtable.column(i).visible(true, true);
-        }
-    } else {
-        for (var i = 1; i < totalcols - 1; i++) {
-            dtable.column(i).visible(false, false);
-        }
-
-    }
-
-    dtable.columns.adjust().draw(false); // adjust column sizing and redraw
 });
 
-
+<?php endif; ?>
 
 	$('.date-picker').datepicker( {
         changeMonth: true,
@@ -884,7 +858,8 @@ $('#trig').on('click', function () {
             $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
         }
     });
-
+	
+$("#dropdowndb").parent().addClass("active");
 </script>
 
   
