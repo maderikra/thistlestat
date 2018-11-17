@@ -36,10 +36,11 @@ if (isset($_GET['inst'])) {
 
 			foreach($resultsdb as $prodnm => $row) {
 				foreach($row as $r) {
-					$newarr[$prodnm][$r['data_type']] = $r['totals'];
+					$newarr[$prodnm][strtolower($r['data_type'])] = $r['totals'];
 				}
 			}
-
+			
+$newarr = insertzeroes($newarr)[0];
 			$totalresults = count($labelsarr);
 			$chartarray[] = $totalsarr;
 			foreach($newarr as $new) {
@@ -48,7 +49,6 @@ if (isset($_GET['inst'])) {
 				}
 			}
 		}
-
 		// get databases by date
 
 		$charttypedd = "line";
