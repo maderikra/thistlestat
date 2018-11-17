@@ -847,11 +847,10 @@ function loaddatabase(event, array) {
         window.location.href = "database.php?product=" + thisabb + "&range=" + $("input[name='range']").val() + "&startdate=" + $("#startdate").val() + "&enddate=" + $("#enddate").val();
     }
 }
+
+$("#dropdownvendor").parent().addClass("active");
 </script>
 
-   
 </body>
-
-
 
 </html>
