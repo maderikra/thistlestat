@@ -835,6 +835,16 @@ $('#institutiontable').DataTable({
     ],
 });
 
+$('#typetable').DataTable({
+    "pageLength": 25,
+    dom: 'Bfrtip',
+    buttons: [
+        'copyHtml5',
+        'excelHtml5',
+        'csvHtml5',
+    ],
+});
+
 dtable = $('#titletable').DataTable({
 
     "paging": true,
@@ -914,7 +924,8 @@ $('#trig').on('click', function () {
             $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
         }
     });
-
+	
+$("#dropdownjournal").parent().addClass("active");
 </script>
 
   
