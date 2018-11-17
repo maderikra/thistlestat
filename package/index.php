@@ -36,6 +36,9 @@ include "chart_summary.php";
  .small-tables{
      font-size:0.8em;
 }
+.card-chart .chart-area {
+    height: 490px;
+}
 </style>
 
 </head>
