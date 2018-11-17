@@ -208,7 +208,7 @@ var myChartdate = new Chart(ctx, {
 			{
 			label: "<?php echo $chartkey; ?>",
 			data: [<?php echo implode(",",$chartvalue); ?>],
-		    backgroundColor: '<?php echo ${"color" . floor($m/$groupings)} ?>',
+		    	//backgroundColor: '<?php echo ${"color" . floor($m/$groupings)} ?>',
 			 borderColor: '<?php echo ${"color" . floor($m/$groupings)} ?>',
 			 fill: false,
             borderWidth: 1,
