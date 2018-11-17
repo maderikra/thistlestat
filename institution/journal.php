@@ -650,13 +650,12 @@ function dldatechart(){
 var url_base64 = document.getElementById('myChart').toDataURL('image/png');
  var url=myChartdate.toBase64Image();
 //window.location.href = 'data:application/octet-stream;base64,' + url;
-}	
+}
+
+$("#dropdownjournal").parent().addClass("active");
 </script>
 <script src="institutionscripts.js"></script>
 
 </body>
 
-
-
 </html>
-
