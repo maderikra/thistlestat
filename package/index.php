@@ -99,7 +99,7 @@ include "chart_summary.php";
 					<th>Abbrev</th>
 					<th>Vendor</th>
 					<th>Product</th>
-					<?php foreach($allitypes as $ityp): ?>
+					<?php foreach($itypesuniq as $ityp): ?>
 					<th><?php echo $ityp; ?></th>
 					<?php endforeach; ?>
 					<th>Total</th>
@@ -167,7 +167,7 @@ include "chart_summary.php";
 					<th>Abbrev</th>
 					<th>Vendor</th>
 					<th>Product</th>
-					<?php foreach($allitypes as $ityp): ?>
+					<?php foreach($itypesuniqb as $ityp): ?>
 					<th><?php echo $ityp; ?></th>
 					<?php endforeach; ?>
 					<th>Total</th>
@@ -230,7 +230,7 @@ include "chart_summary.php";
 					<th>Abbrev</th>
 					<th>Vendor</th>
 					<th>Product</th>
-					<?php foreach($allitypes as $ityp): ?>
+					<?php foreach($itypesuniqdb as $ityp): ?>
 					<th><?php echo $ityp; ?></th>
 					<?php endforeach; ?>
 					<th>Total</th>
