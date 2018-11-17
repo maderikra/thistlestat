@@ -11,6 +11,8 @@ if (isset($_GET['product'])) {
 	$stmt->execute(['product' => $productname, 'startdate' => $startdate, 'enddate' => $enddate]);
 	$resultstitle = $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
 
+	//make sure there are results
+	if ($resultstitle){
 	// get all inst types
 
 	foreach($resultstitle as $re) {
@@ -184,6 +186,7 @@ if (isset($_GET['product'])) {
 		}
 
 		ksort($nwr);
+		}
 	}
 }
 else {
