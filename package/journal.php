@@ -62,6 +62,7 @@ include "chart_journal.php";
 					</tr>
 				</table>
 			</div>
+			<?php if($resultstitle) : ?>
 			<div class="content">
 				<div class="row">
 					<div class="col-lg-4 top-left card-transition">
@@ -297,6 +298,9 @@ include "chart_journal.php";
 				
 
 			</div>
+			<?php else : ?>
+			<div class="alert alert-danger" role="alert"> There are no statistics for the selected dates.</div>
+			<?php endif; ?>
 			<?php include dirname(dirname( __FILE__ )) . "/includes/footer.php"; ?>
 		</div>
 	</div>
@@ -324,7 +328,7 @@ $("#quicksearch").autocomplete({
     }
    });
 });
-
+<?php if($resultstitle) : ?>
 var ctx = document.getElementById("myChartinst").getContext('2d');
 var myChart = new Chart(ctx, {
     type: '<?php echo $charttype; ?>',
@@ -896,7 +900,7 @@ $('#trig').on('click', function () {
 		dtable.columns.adjust().draw( false ); // adjust column sizing and redraw
 	});
 
-
+<?php endif; ?>
 
 
 	$('.date-picker').datepicker( {
