@@ -106,10 +106,7 @@ include 'chart_basic_summary.php';
 					<div class="col-lg-6 top-left card-transition">
 							<div class="card card-chart">
 							<div class="card-header">
-								<h5 class="card-category"><i class="material-icons">description</i> Journal Packages</h5>
-								<div class="dropdown">
-									<button class="btn btn-round btn-default btn-simple btn-icon no-caret" id="trig" title="Expand Graph" type="button"><i class="material-icons">zoom_out_map</i></button>
-								</div>
+								<h4 class="card-title"><i class="material-icons " id="trig"  title="Expand Graph">zoom_out_map</i> Journal Packages</h4>
 							</div>
 							<div class="card-body">
 								 <div class="myChartDiv">
@@ -128,10 +125,7 @@ include 'chart_basic_summary.php';
 						
 							<div class="card card-chart">
 							<div class="card-header">
-								<h5 class="card-category"><i class="material-icons">import_contacts</i> E-Book Packages</h5>
-								<div class="dropdown">
-									<button class="btn btn-round btn-default btn-simple btn-icon no-caret" id="trig2" title="Expand Graph" type="button"><i class="material-icons">zoom_out_map</i></button> 
-								</div>
+								<h4 class="card-title"><i class="material-icons " id="trig1"  title="Expand Graph">zoom_out_map</i> E-Book Packages</h4>
 							</div>
 							<div class="card-body">
 							  <div class="myChartDiv">
@@ -154,10 +148,7 @@ include 'chart_basic_summary.php';
 					<div class="col-md-12 bottom-right card-transition">
 											<div class="card card-chart">
 							<div class="card-header">
-								<h5 class="card-category"><i class="material-icons">laptop_mac</i> Database Packages</h5>
-								<div class="dropdown">
-									<button class="btn btn-round btn-default btn-simple btn-icon no-caret" id="expandtable" title="Expand Graph" type="button"><i class="material-icons">zoom_out_map</i></button>
-								</div>
+								<h4 class="card-title">Database Packages</h4>
 							</div>
 							<div class="card-body">
 											<ul class="nav nav-pills nav-wizard" role="tablist">
@@ -200,8 +191,7 @@ include 'chart_basic_summary.php';
 					<div class="col-md-12 ">
 										<div class="card card-chart">
 										<div class="card-header">
-								<h5 class="card-category"><i class="material-icons">list_alt</i> Package List</h5>
-							
+										<h4 class="card-title"><i class="material-icons">list_alt</i> Package List</h4>
 							</div>
 											<div class="card-body">
 											
@@ -284,10 +274,10 @@ var ctxb = document.getElementById("myChartb").getContext('2d');
 		 onClick: loadbooks,
   		 maintainAspectRatio: false,
 		 title: {
-            display: true,
-            text: 'E-Book Packages',
-			fontSize: 16,
-			fontColor: "#3535b2",
+            display: false,
+            //text: 'E-Book Packages',
+			//fontSize: 16,
+			//fontColor: "#3535b2",
         },
         scales: {
 			 xAxes: [{
@@ -345,10 +335,10 @@ var ctx = document.getElementById("myChartstacked").getContext('2d');
 		 onClick: loadvendors,
    		 maintainAspectRatio: false,
 		 title: {
-            display: true,
-            text: 'Database Packages',
-			fontSize: 16,
-			fontColor: "#3535b2",
+            display: false,
+            //text: 'Database Packages',
+			//fontSize: 16,
+			//fontColor: "#3535b2",
         },
         scales: {
 			 xAxes: [{
@@ -403,10 +393,10 @@ var ctx = document.getElementById("myChart").getContext('2d');
 		 onClick: loaddatabases,
    		 maintainAspectRatio: false,
 		 title: {
-            display: true,
-            text: 'Database Packages',
-			fontSize: 16,
-			fontColor: "#3535b2",
+            display: false,
+            //text: 'Database Packages',
+			//fontSize: 16,
+			//fontColor: "#3535b2",
         },
         scales: {
 			 xAxes: [{
@@ -530,10 +520,10 @@ var myChartj = new Chart(ctxj, {
 		 onClick: loadjournals,
     maintainAspectRatio: false,
 		 title: {
-            display: true,
-            text: 'Journal Packages',
-			fontSize: 16,
-			fontColor: "#3535b2",
+            display: false,
+            //text: 'Journal Packages',
+			//fontSize: 16,
+			//fontColor: "#3535b2",
         },
         scales: {
 			 xAxes: [{
@@ -570,24 +560,13 @@ $('#trig').on('click', function () {
 	$('.top-left').toggleClass('col-lg-12');
 	});
 
-	$('#trig2').on('click', function () {
-	$('.bottom-left').toggleClass('col-lg-12');
-	});
-
 	$('#trig1').on('click', function () {
 		$('.top-left').toggleClass('order-lg-12');
 		$('.top-left').toggleClass('order-lg-1');
 	$('.top-right').toggleClass('col-lg-12');
 	});
-	
-	$('#expandtable').on('click', function () {
-		$('.bottom-left').toggleClass('order-lg-4');
-		$('.bottom-left').toggleClass('order-lg-1');
-	$('.bottom-right').toggleClass('col-lg-12');
-	});
 
-
-			$('#inst').change(function() {
+	$('#inst').change(function() {
 		$("#reloadbench").fadeIn("slow");
 	});
 
