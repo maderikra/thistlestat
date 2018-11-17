@@ -10,7 +10,9 @@ if (isset($_GET['product'])) {
 	$stmt = $pdo->prepare('SELECT Title, Inst_type, SUM(Requests) as totals FROM ' . JOURNALTABLE . ' WHERE product_abbrev = :product AND start_date >= :startdate and start_date <= :enddate group by Title,Inst_type');
 	$stmt->execute(['product' => $productname, 'startdate' => $startdate, 'enddate' => $enddate]);
 	$resultstitle = $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
-
+	
+	//make sure there are results
+	if ($resultstitle){
 	// get all inst types
 
 	foreach($resultstitle as $re) {
@@ -184,6 +186,7 @@ if (isset($_GET['product'])) {
 		}
 
 		ksort($nwr);
+		}
 	}
 }
 else {
