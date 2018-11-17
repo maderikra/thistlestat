@@ -826,6 +826,16 @@ $(document).ready(function() {
             'csvHtml5',
         ],
     });
+	
+	$('#typetable').DataTable({
+        "pageLength": 25,
+        dom: 'Bfrtip',
+        buttons: [
+            'copyHtml5',
+            'excelHtml5',
+            'csvHtml5',
+        ],
+    });
 
     dtable = $('#titletable').DataTable({
         "paging": true,
@@ -909,6 +919,7 @@ $('#expandtable').on('click', function() {
         }
     });
 
+$("#dropdownbook").parent().addClass("active");
 </script>
 
    
