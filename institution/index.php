@@ -71,7 +71,12 @@ include 'chart_basic_summary.php';
              </div>
             <div class="col-md-6 col-sm-12">
                          <h3 class="instname"><?php echo $fullinstname; ?> </h3>  
-						 
+			<table class="sm-table" id="summtable">
+				<tr>
+					<td class="cellheading">Dates Selected:</td>
+					<td><?php echo $startdate . ' to ' . $enddate; ?></td>
+				</tr>
+			</table>			 
 				
 					
 			</div>
