@@ -58,7 +58,12 @@ include "chart_summary.php";
 
 
  		<h3 class="instname">Consortium View</h3>
-
+						<table class="sm-table" id="summtable">
+							<tr>
+								<td class="cellheading">Dates Selected:</td>
+								<td><?php echo $startdate . ' to ' . $enddate; ?></td>
+							</tr>
+						</table>
 	  </div>
       <div class="content">
 
