@@ -1,15 +1,9 @@
 <div class="wrapper ">
     <div class="sidebar" data-color="lightblue">
         <div class="logo">
-            <a href="/" class="simple-text logo-mini">
-                <img src="/img/logo.png" />
-            </a>
-            <a href="/" class="simple-text logo-normal">
-          Usage Data
-        </a>
-
+            <a href="/" class="simple-text logo-mini"><img src="/img/logo.png" /></a>
+            <a href="/" class="simple-text logo-normal">Usage Data</a>
         </div>
-
         <div class="sidebar-wrapper">
             <ul class="nav">
                 <li class="dropdown">
@@ -77,42 +71,24 @@
                             <input type='radio' value='custom' name='range' id='rangecustom' />
                             <label for='rangecustom' data-toggle="collapse" href="#collapsedates" aria-expanded="false" aria-controls="collapsedates">Custom Range</label>
                             <div class="collapse" id="collapsedates">
-                
                                 <div class="nav-link">
-                
                                     <div class="form-group row">
-                
-                                        <div class="input-group">
-                
-                                            <div class="input-group-prepend">Start
-                
-                                            </div>
-                
+                                        <div class="input-group">              
+                                            <div class="input-group-prepend">Start</div>
                                             <input type="text" id="startdate" name="startdate" class="date-picker" autocomplete="off" aria-describedby="basic-addon1">
-                
                                         </div>
-                
                                         <div class="input-group">
-                
-                                            <div class="input-group-prepend">
-                                                End
-                
-                                            </div>
-                
+                                            <div class="input-group-prepend">End</div>
                                             <input type="text" id="enddate" name="enddate" class="date-picker" autocomplete="off" aria-describedby="basic-addon2">
-                
-                                        </div>
-                                        <button class="btn btn-blue btn-xs" id="reload" onclick="reloadpack()">Reload Data</button>
+                                        </div> 
                                     </div>
                                 </div>
                             </div>
+							<br>
+							<button class="btn btn-blue btn-xs" id="reload" onclick="reloadpack()">Reload Data</button>
                         </li>
                     </ul>
                 </li>
-                </li>
-                
-                </ul>
-                
-                </div>
-                
-                </div>
+            </ul>
+    </div>
+</div>
