@@ -134,7 +134,7 @@ function institutionlookup($searchterm,$searchtype){
 	return $instresult;
 }
 
-$stmtinst = $pdo->prepare('SELECT Inst_abbrev, Institution FROM institutions');
+$stmtinst = $pdo->prepare('SELECT Inst_abbrev, Institution FROM ' . INSTITUTIONSTABLE);
 $stmtinst->execute();
 $institutionarrayres = $stmtinst->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE);
 $institutionarray = array();
