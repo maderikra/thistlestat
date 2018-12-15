@@ -39,6 +39,10 @@ include "chart_summary.php";
 .card-chart .chart-area {
     height: 490px;
 }
+/* highlight total usage column */
+td:last-child, td:first-child {
+    font-weight:bold;
+}
 </style>
 
 </head>
