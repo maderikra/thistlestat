@@ -737,7 +737,7 @@ for (k = 0; k < myChart.data.datasets.length; k++) {
     myChart.data.datasets[k].backgroundColor = [];
     for (i = 0; i < myChart.data.datasets[k].data.length; i++) {
         var curgroup = myChart.data.types[i];
-        var newcol = LightenDarkenColor(groupcolors[curgroup].color, k * 20);
+        var newcol = LightenDarkenColor(groupcolors[curgroup].color, k * 40);
         myChart.data.datasets[k].backgroundColor.push(newcol);
     }
 }
@@ -749,7 +749,7 @@ for (k = 0; k < myCharttype.data.datasets.length; k++) {
     myCharttype.data.datasets[k].backgroundColor = [];
     for (i = 0; i < myCharttype.data.datasets[k].data.length; i++) {
         var curgroup = myCharttype.data.types[i];
-        var newcol = LightenDarkenColor(groupcolors[curgroup].color, k * 20);
+        var newcol = LightenDarkenColor(groupcolors[curgroup].color, k * 40);
         myCharttype.data.datasets[k].backgroundColor.push(newcol);
     }
 }
