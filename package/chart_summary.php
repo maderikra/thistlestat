@@ -25,6 +25,7 @@ function ($v, $k) use(&$itypesuniq)
 	$itypesuniq[] = $v;
 });
 $itypesuniq = array_unique($itypesuniq);
+sort($itypesuniq);
 
 // make sure all inst types appear in all arrays
 foreach($results as $pname1 => & $res0) {
@@ -95,6 +96,7 @@ function ($v, $k) use(&$itypesuniqb)
 	$itypesuniqb[] = $v;
 });
 $itypesuniqb = array_unique($itypesuniqb);
+sort($itypesuniqb);
 
 // make sure all inst types appear in all arrays
 foreach($resultsb as $pnameb => & $resb) {
@@ -210,6 +212,7 @@ function ($v, $k) use(&$itypesuniqdb)
 	$itypesuniqdb[] = $v;
 });
 $itypesuniqdb = array_unique($itypesuniqdb);
+sort($itypesuniqdb);
 
 // make sure all inst types appear in all arrays
 foreach($resultsdb as $pnamed => & $resdb) {
