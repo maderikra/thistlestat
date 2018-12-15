@@ -281,8 +281,18 @@ if (isset($_GET['product'])) {
 	}
 
 	// dedupe
-
 	$keyarray = array_unique($keyarray);
+	
+	//make sure all labels show up in all arrays
+	foreach ($resultsdb as $rkey => &$rdb){
+		foreach ($keyarray as $k1){
+			if(!in_array($k1, array_column($rdb, 'data_type'))) { 
+			$rdb[] = array("product_abbrev" => $rdb[0]['product_abbrev'],"data_type" => $k1, "totals" => "0");
+			}
+		}
+		//re-sort array to make sure new entries are in the right place
+		 usort($rdb, function($a, $b){ return  strcasecmp($a["data_type"], $b["data_type"]); });
+	}
 
 	// sort it
 	// i hope this wasn't important 3-21-18
